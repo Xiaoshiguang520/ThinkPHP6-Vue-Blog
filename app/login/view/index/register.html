@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>注册</title>
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: {$data['theme_background']};
+            /* background-image: url(1.jpg); */
+            background-size: 100% 100%;
+            background-attachment: fixed;
+        }
+
+        #app {
+            width: 600px;
+            height: 600px;
+            /* border: 1px solid white ; */
+            box-shadow: 0px 0px 35px white;
+            /* border-radius: 10px; */
+            left: 50%;
+            top: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .top1 {
+            border-radius: 10px 10px 0 0;
+            width: 100%;
+            height: 16%;
+
+        }
+
+        .top2 {
+            width: 100%;
+            height: 55%;
+        }
+
+        .top3 {
+            padding-top: 10px;
+            border-radius: 0 0 10px 10px;
+            width: 100%;
+            height: 24%;
+        }
+
+        h1 {
+            text-align: center;
+            line-height: 90px;
+
+            color: {$data['theme_color']};
+        }
+
+        .inp1 {
+            margin-top: 40px;
+            width: 80%;
+            color: #000000;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 17px;
+        }
+
+        .inp1 .el-input__inner {
+            height: 50px;
+        }
+
+        .inp2 {
+            margin-top: 30px;
+            width: 80%;
+            color: #000000;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 17px;
+        }
+
+        .inp2 .el-input__inner {
+            height: 50px;
+        }
+
+        .but1 {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 150px;
+            height: 50px;
+            font-size: 17px;
+        }
+
+        .but2 {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top1">
+            <h1>注册</h1>
+        </div>
+        <div class="top2">
+            <el-input placeholder="请输入账号" prefix-icon="el-icon-user" validate-event :maxlength='30' class="inp1"
+                v-model="from.account">
+            </el-input>
+            <el-input placeholder="请输入密码" prefix-icon="el-icon-unlock" :maxlength='30' class="inp2"
+                v-model="from.password" show-password>
+            </el-input>
+            <el-input placeholder="请输入两次相同密码" prefix-icon="el-icon-unlock" :maxlength='30' class="inp2"
+                v-model="password2" show-password>
+            </el-input>
+            <el-input placeholder="请输入用户名" prefix-icon="el-icon-house" :maxlength='30' class="inp2" v-model="from.name">
+            </el-input>
+        </div>
+        <div class="top3">
+            <div id="">
+                <el-button type="success" class="but1" @click="submit()">注册</el-button>
+            </div>
+            <div style="margin-top: 20px;">
+                <el-button type="primary" size="mini" class="but2" @click="login()">登录</el-button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                password2: '',
+                from: {
+                    account: '',
+                    password: '',
+                    name: ''
+                }
+            },
+            methods: {
+                submit: function () {
+                    if (this.from.account == '') {
+                        this.$message({
+                            message: '请输入账号',
+                            type: 'warning'
+                        });
+                    } else if (this.from.password == '') {
+                        this.$message({
+                            message: '请输入密码',
+                            type: 'warning'
+                        });
+                    } else if (this.password2 == '') {
+                        this.$message({
+                            message: '请输入密码',
+                            type: 'warning'
+                        });
+                    }
+                    else if (this.from.name == '') {
+                        this.$message({
+                            message: '请输入用户名',
+                            type: 'warning'
+                        });
+                    } else if (this.password2 != this.from.password) {
+                        this.$message({
+                            message: '两次密码不相同',
+                            type: 'warning'
+                        });
+                    } else {
+                        var thiss = this;
+                        axios.post('/login/index/registers', thiss.from).then(
+                            function (response) {
+                                if (response.data.code == 0) {
+                                    console.log(response.data);
+                                    //消息弹窗
+                                    thiss.$message({
+                                        showClose: true,
+                                        message: '注册成功',
+                                        type: 'success'
+                                    });
+                                    //延时执行
+                                    thiss.timer = setTimeout(() => {
+                                        window.location.href = "/login";
+                                    }, 1000);
+                                } else if (response.data.code == 1) {
+                                    console.log(response.data);
+                                    thiss.$message.error("注册失败");
+                                }else if (response.data.code == 2) {
+                                    console.log(response.data);
+                                    thiss.$message.error("账号已存在，请更换账号！");
+                                }
+                            })
+                    }
+                },
+                login: function () {
+                    window.location.href = "/login";
+                }
+
+            }
+        })
+    </script>
+</body>
+
+</html>

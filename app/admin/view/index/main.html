@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 头像部分 */
+        .user {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .user img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-right: 40px;
+        }
+
+        .user .userinfo .name {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .user .userinfo .access {
+            color: #999999;
+        }
+
+        .login-info p {
+            line-height: 28px;
+            font-size: 14px;
+            color: #999999;
+        }
+
+        .login-info span {
+            color: #666666;
+            margin-left: 60px;
+        }
+
+        .usercom {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .statistical{
+            height: 60px;
+            width: 200px;
+            padding: 0;
+            border:1px solid #EBEEF5;
+            border-radius: 10px;
+            margin-top: 15px;
+            float: left;
+            margin-left: 30px;
+        }
+        .statistical-i{
+            font-size: 30px;
+            margin-top: 15px;
+            margin-left: 15px;
+            color: white;
+        }
+        .statistical-p{
+            text-align: center;
+            font-size: 25px;
+            margin-top: 15px;
+            color: #606266;
+        }
+        .statistical-div{
+            width: 30%;
+            height: 100%;
+            border-radius: 10px 0 0 10px;
+            float: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" style="margin-bottom: 30px;">
+        <el-row :gutter="20" style="margin-top:20px;margin-left: 5px;margin-right: 5px;">
+            <el-col :span="8">
+                <div class="grid-content bg-purple">
+                    <!-- 个人资料 -->
+                    <el-card shadow="hover">
+                        <div class="user">
+                            <img src="__STORAGE__/{$user['logourl']}" alt="">
+                            <div class="userinfo">
+                                <p class="name">{$user['name']}</p>
+                                <p class="access">{switch $user['permission_id']}{case 1 }管理员{/case}{case 2 }普通用户{/case}{/switch}</p>
+                            </div>
+                        </div>
+                        <div class="login-info">
+                            <p>注册时间:<span>{$user['addTime']}</span></p>
+                            <p>当前IP地址:<span>{$ip}</span></p>
+                        </div>
+                    </el-card>
+                    <!-- 近期评论 -->
+                    <el-card shadow="hover" style="margin-top: 10px;" v-if="permission_id==1">
+                        <h3>近期评论</h3>
+                        <el-table :data="tableData2" height="auto">
+                            <el-table-column prop="image" label="头像" width="70">
+                                <template slot-scope="scope">
+                                    <div v-html="scope.row.image"></div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="author" label="作者" width="100">
+                            </el-table-column>
+                            <el-table-column prop="test" label="内容">
+                            </el-table-column>
+                            <el-table-column prop="date" label="日期" width="100">
+                            </el-table-column>
+                        </el-table>
+                    </el-card>
+                    <el-card shadow="hover" style="margin-top: 10px;padding-bottom: 30px;" v-if="permission_id==1">
+                        <h3 style="margin-bottom: 10px;">统计信息</h3>
+                        <!-- 统计用户 -->
+                        <div class="statistical">
+                            <div class="statistical-div" style="background-color: rgb(76, 252, 120);">
+                                <i class="el-icon-user-solid statistical-i"></i>
+                            </div>
+                            <div class="statistical-p"><p>{$statistical1}人</p></div>
+                        </div>
+                        <div class="statistical">
+                            <div class="statistical-div" style="background-color: rgb(38, 202, 252);">
+                                <i class="el-icon-document statistical-i"></i>
+                            </div>
+                            <div class="statistical-p"><p>{$statistical2}篇</p></div>
+                        </div>
+                        <div class="statistical">
+                            <div class="statistical-div" style="background-color: rgb(255, 218, 98);">
+                                <i class="el-icon-chat-round statistical-i"></i>
+                            </div>
+                            <div  class="statistical-p"><p>{$statistical3}条</p></div>
+                        </div>
+                    </el-card>
+                </div>
+            </el-col>
+            <el-col :span="16">
+                <div class="grid-content bg-purple">
+                    <!-- 近期发布文章 -->
+                    <el-card shadow="hover">
+                        <h3>近期发布文章</h3>
+                        <el-table :data="tableData" style="width: 100%">
+                            <el-table-column prop="date" label="日期" width="250">
+                            </el-table-column>
+                            <el-table-column prop="name" label="文章标题">
+                            </el-table-column>
+                            <el-table-column prop="user" label="作者" width="250">
+                            </el-table-column>
+                        </el-table>
+                    </el-card>
+                    <el-card shadow="hover" style="margin-top: 10px;">
+                        <h3 style="margin-bottom: 10px;">更新历史</h3>
+                        <div class="block">
+                            <el-timeline>
+                                <el-timeline-item timestamp="2021/12/25" placement="top" color="#0bbd87">
+                                    <el-card>
+                                        <h4>添加面板统计信息</h4>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2021/12/24" placement="top">
+                                    <el-card>
+                                        <h4>1.修复登录状态</h4>
+                                        <h4>2.修复用户退出后还能在首页评论问题</h4>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2021/12/24" placement="top">
+                                    <el-card>
+                                        <h4>1.修复删除文章不能删除评论问题</h4>
+                                        <h4>2.修复删除用户不能删除评论以及头像问题</h4>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2021/11/25" placement="top">
+                                    <el-card>
+                                        <h4>ThinkPHP6项目创建，基于Vue,Element,Axios前端技术编写页面样式</h4>
+                                    </el-card>
+                                </el-timeline-item>
+                            </el-timeline>
+                        </div>
+                    </el-card>
+                </div>
+            </el-col>
+        </el-row>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                permission_id:"{$user['permission_id']}",
+                tableData: [
+                    {foreach $article as $test}
+                        {
+                            name: "{$test['title']}",
+                            user: "{$test['author']}",
+                            date: "{$test['time']}"
+                        },
+                    {/foreach}
+                ],
+                tableData2: [
+                {foreach $comments as $test}    
+                {
+                    image: '<img src="__STORAGE__/{$test['logourl']}" class="usercom">',
+                    author: "{$test['comments_author']}",
+                    test: "{$test['comments_text']}",
+                    date: "{$test['comments_time']}"
+                },
+                {/foreach}
+                ]
+            }
+        })
+    </script>
+</body>
+
+</html>

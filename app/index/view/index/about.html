@@ -1,0 +1,38 @@
+{block name="title"}关于{/block}
+{extend name="index/main"}
+{block name="style"}
+<style>
+    .title_s {
+        text-align: center;
+        font-size: 33px;
+    }
+
+    .test_s {
+        margin: 50px;
+    }
+</style>
+{/block}
+{block name="body"}
+<div id="app2" style="margin: 20px;">
+    <el-card>
+        <p class="title_s">关于</p>
+        <div class="test_s">
+            {$blog_page["text"]|raw}
+        </div>
+    </el-card>
+</div>
+{/block}
+
+
+{block name="script"}
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+
+        },
+        methods: {
+        }
+    })
+</script>
+{/block}

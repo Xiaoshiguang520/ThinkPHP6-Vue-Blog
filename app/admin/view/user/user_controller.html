@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+    <style>
+        .user {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" style="margin:20px;">
+        <h1>用户管理</h1>
+        <template>
+            <el-button style="margin-bottom: 10px;" type="primary" @click="find=!find" plain>查找用户</el-button>
+            <el-table :data="tableData" border>
+                <el-table-column prop="id" label="id" width="150">
+                </el-table-column>
+                <el-table-column prop="image" label="头像" width="70">
+                    <template slot-scope="scope">
+                        <div v-html="scope.row.image"></div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="account" label="账户" width="200">
+                </el-table-column>
+                <el-table-column prop="name" label="用户名" width="200">
+                </el-table-column>
+                <el-table-column prop="permission_id" label="权限" width="400">
+                    <template slot-scope="scope">
+                        <el-tag type="success" v-if="scope.row.permission_id=='管理员'">{{scope.row.permission_id}}</el-tag>
+                        <el-tag v-if="scope.row.permission_id=='普通用户'">{{scope.row.permission_id}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="date" label="注册日期">
+
+                </el-table-column>
+                <el-table-column fixed="right" label="操作" width="150">
+                    <template slot-scope="scope">
+                        <!-- <el-button type="text" size="small">查看</el-button> -->
+                        <el-button type="text" size="small" @click="edit(scope.row)">编辑</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.id!=1" @click="del(scope.row.id)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <br>
+        <el-pagination background layout="prev, pager, next" @current-change="currentChange" :page-size="pageNumber"
+            :total="sum" :current-page="thiss" style="margin-top: 10px;"></el-pagination>
+
+             <!-- 添加与修改 -->
+     <el-dialog title="编辑" :visible.sync="dialogVisible" width="30%">
+        <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="用户名">
+                <el-input v-model="form.name" maxlength="30"></el-input>
+            </el-form-item>
+            <el-form-item label="性别">
+                <el-select v-model="form.sex" placeholder="性别">
+                    <el-option label="男" value="男"></el-option>
+                    <el-option label="女" value="女"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="年龄">
+                <el-input v-model="form.age" maxlength="3"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱">
+                <el-input v-model="form.email" maxlength="30"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submits">确 定</el-button>
+        </span>
+    </el-dialog>
+    <!-- 查找用户 -->
+    <el-card v-show="find!=false" style="margin-top: 30px;">
+        <h1>查找</h1>
+        <el-form :model="finduser" status-icon ref="finduser" label-width="100px">
+            <el-form-item label="类型">
+                <el-select v-model="finduser.class" placeholder="类型">
+                    <el-option label="ID" value="id"></el-option>
+                    <el-option label="账户" value="account"></el-option>
+                    <el-option label="用户名" value="name"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item  label="文本">
+                <el-input v-model="finduser.test" style="width: 221.4px;" maxlength="30"></el-input>
+            </el-form-item>
+            <el-button type="primary" style="margin-left: 100px;" @click="findusers">查找</el-button>
+        </el-form>
+    </el-card>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                find:'{$find}',
+                url:'',
+                dialogVisible: false,
+                pageNumber: 10,
+                currentChangeIndex: 1,
+                sum: {$count},
+                thiss: {$p},
+                finduser:{
+                    class:"{$class}",
+                    test:"{$test}",
+                },
+                form:{
+                    id:'',
+                    name:'',
+                    sex:'',
+                    age:'',
+                    email:'',
+                },
+                tableData: [
+                {foreach $user as $tests}
+                    {
+                        id: "{$tests['id']}",
+                        image: '<img src="__STORAGE__/{$tests['logourl']}" class="user">',
+                        account: "{$tests['account']}",
+                        name: "{$tests['name']}",
+                        permission_id: "{switch $tests['permission_id']}{case 1 }管理员{/case}{case 2 }普通用户{/case}{/switch}",
+                        date: "{$tests['addTime']}",
+                        sex:"{$tests['sex']}",
+                        age:"{$tests['age']}",
+                        email:"{$tests['email']}",
+                    },
+                    {/foreach}
+                ]
+            },
+            methods: {
+                currentChange: function(current) {
+                this.currentChangeIndex = current;
+                window.location.href = "/admin/user/userController?p=" + this.currentChangeIndex;
+                },
+                edit:function(data){
+                    this.form.id=data.id;
+                    this.form.name=data.name;
+                    this.form.sex=data.sex;
+                    this.form.age=data.age;
+                    this.form.email=data.email;
+                    //console.log(data);
+                    this.url='/admin/user/updateUser';
+                    this.dialogVisible=true;
+                },
+                del:function(id){
+                    this.form.id=id;
+                    this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.url = '/admin/user/delUser';
+                        this.submits();
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    });
+                },
+                findusers:function(){
+                    if(this.finduser.class==''){
+                        this.$message("请选择查找类型");
+                    }else if(this.finduser.test==''){
+                        window.location.href="/admin/user/userController";
+                    }else{
+                        console.log(this.finduser);
+                        window.location.href="/admin/user/userController?finduser=1&class="+this.finduser.class+"&test="+this.finduser.test;
+                    } 
+                },
+                submits:function(){
+                    var thiss=this;
+                    axios.post(this.url, thiss.form).then(
+                    function (response) {
+                        if (response.data.code == 0) {
+                            console.log(response.data);
+                            //消息弹窗
+                            thiss.$message({
+                                showClose: true,
+                                message: '成功！',
+                                type: 'success'
+                            });
+                            //延时执行
+                            thiss.timer = setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else if (response.data.code == 1) {
+                            console.log(response.data);
+                            thiss.$message('修改失败');
+                        }
+                    })
+                    this.dialogVisible=false;
+                }
+
+            }
+        })
+    </script>
+</body>
+
+</html>
+
+

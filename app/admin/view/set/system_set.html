@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+    <style>
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+        .head-img{
+            width: 126px;
+            height: 126px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" style="margin:20px;">
+        <el-card>
+            <h1>常规设置</h1>
+            <el-form :model="form" status-icon ref="form" label-width="100px">
+                <el-form-item label="LOGO" prop="img">
+                    <section>
+                        <img class="head-img" :src="form.imageUrl" />
+                        <el-upload class="img-btn" action="#" :show-file-list="false"
+                            :before-upload="beforeAvatarUpload" :http-request="uploadImg">
+                            <el-button  style="margin-top: 5px;margin-left: 20px;" type="primary" plain round size="mini">更改头像</el-button>
+                        </el-upload>
+                    </section>
+                </el-form-item>
+            </el-form>
+            <el-divider></el-divider>
+            <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="100px"
+                class="demo-ruleForm">
+                <el-form-item label="站点名称" prop="sys_title">
+                    <el-input type="text" v-model="ruleForm.sys_title" maxlength="6" autocomplete="off" style="width: 400px;"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="edit">修改</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                form:{
+                    imageUrl: "__STORAGE__/{$system['sys_logo']}",
+                },
+                ruleForm: {
+                    id:"{$system['id']}",
+                    sys_title: "{$system['sys_title']}",
+                }
+            },
+            methods: {
+                uploadImg(f) {
+                    console.log(f)
+                    this.progressFlag = true
+                    let formdata = new FormData()
+                    formdata.append('image', f.file)
+                    axios({
+                        url: '/admin/set/updateLogo',
+                        method: 'post',
+                        data: formdata,
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }).then(res => {
+                        console.log(res.data.data);
+                        location.reload();
+                    }).then(error => {
+                        console.log(error)
+                    })
+                },
+                // 上传图片前的过滤
+                beforeAvatarUpload(file) {
+                    const isJPG = file.type === 'image/jpeg'
+                    const isLt2M = (file.size / 1024 / 1024) < 2
+
+                    if (!isJPG) {
+                        this.$message.error('上传头像图片只能是 JPG 格式!')
+                    }
+                    if (!isLt2M) {
+                        this.$message.error('上传头像图片大小不能超过 2MB!')
+                    }
+                    return isJPG && isLt2M
+                },
+
+                handleAvatarSuccess(res, file) {
+                    this.imageUrl = URL.createObjectURL(file.raw);
+                },
+                beforeAvatarUpload(file) {
+                    const isJPG = file.type === 'image/jpeg';
+                    const isLt2M = file.size / 1024 / 1024 < 2;
+
+                    if (!isJPG) {
+                        this.$message.error('上传头像图片只能是 JPG 格式!');
+                    }
+                    if (!isLt2M) {
+                        this.$message.error('上传头像图片大小不能超过 2MB!');
+                    }
+                    return isJPG && isLt2M;
+                },
+                edit:function(){
+                    console.log(this.ruleForm);
+                    var thiss=this;
+                    axios.post("/admin/set/updateSystem", thiss.ruleForm).then(
+                    function (response) {
+                        if (response.data.code == 0) {
+                            console.log(response.data);
+                            //消息弹窗
+                            thiss.$message({
+                                showClose: true,
+                                message: '成功！',
+                                type: 'success'
+                            });
+                            //延时执行
+                            thiss.timer = setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else if (response.data.code == 1) {
+                            console.log(response.data);
+                            thiss.$message('检查是否修改');
+                        }
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

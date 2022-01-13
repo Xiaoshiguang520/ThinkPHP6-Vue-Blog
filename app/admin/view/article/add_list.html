@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+    <script src="__STATIC__\wangEditor\wangEditor.js"></script>
+</head>
+
+<body>
+    <div id="app" style="margin-right: 10px;margin-left: 10px;">
+        <h1>写文章</h1>
+        <el-input v-model="from.title" placeholder="请输入标题" :maxlength="49" style="margin-bottom: 20px;"></el-input>
+        <div id="div1" style="margin-bottom: 20px;"></div>
+
+        <template>
+            <el-select v-model="from.class_id" placeholder="分类" style="margin-bottom: 20px;">
+                {foreach $class as $test}
+                <el-option label="{$test['class_name']}" value="{$test['class_id']}"></el-option>
+                {/foreach}
+            </el-select>
+        </template>
+        <br>
+        <el-button type="primary" @click="alerts()" plain>发表文章</el-button>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                editor: null,
+                editorData: '',
+                from: {
+                    title: '',
+                    text: '',
+                    text1:'',
+                    class_id: '1'
+                }
+            },
+            mounted: function () {
+                const E = window.wangEditor
+                const editor = new E('#div1')
+                // 配置 onchange 回调函数，将数据同步到 vue 中
+                editor.config.onchange = (newHtml) => {
+                    this.editorData = newHtml;
+                }
+                editor.config.excludeMenus = [
+                    'emoticon'
+                ]
+                editor.config.pasteFilterStyle = false
+                // 创建编辑器
+                editor.create()
+                this.editor = editor
+            },
+            methods: {
+                alerts: function () {
+                    alert(this.editor.txt.html());
+                    this.from.text=this.editor.txt.html();
+                    this.from.text1=this.editor.txt.text().slice(0,200);
+                    var thiss = this;
+                    axios.post('/admin/article/addList', thiss.from).then(
+                        function (response) {
+                            if (response.data.code == 0) {
+                                thiss.$message({
+                                    showClose: true,
+                                    message: '添加成功',
+                                    type: 'success'
+                                });
+                            } else if (response.data.code == 1) {
+                                console.log(response.data);
+                            }
+                        })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{$title}</title>
+  <!-- 先引入vue，再引入element -->
+  <script src="__STATIC__\vue\vue.js"></script>
+  <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+  <script src="__STATIC__\element\js\index.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 菜单部分 */
+    .el-aside {
+      height: 100vh;
+    }
+
+    .el-menu {
+      height: 100%;
+      border: none;
+    }
+
+    .el-menu h3 {
+      color: #ffffff;
+      text-align: center;
+      line-height: 48px;
+      padding: 6px 0;
+    }
+
+    .el-menu-vertical-demo:not(.el-menu--collapse) {
+      width: 200px;
+      min-height: 400px;
+    }
+
+    .el-header {
+      background-color: #333;
+    }
+
+    /* 头部部分 */
+    header {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: space-between;
+      float: left;
+    }
+
+    .l-content {
+      display: flex;
+      align-items: center;
+      float: left;
+    }
+
+    .l-content .el-button {
+      margin-right: 20px;
+      color: black;
+    }
+
+    .r-content {
+      float: right;
+    }
+
+    .r-content .user {
+      margin-top: 7px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid black;
+    }
+
+    /* 中间 */
+    .el-main {
+      padding: 0;
+    }
+
+    .iframeMain {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
+
+    .el-menu-item.is-active {
+
+      border-bottom: none;
+    }
+
+    .el-menu-item.is-active {
+
+      background-color: #333333 !important;
+    }
+
+    .el-menu.el-menu--horizontal {
+
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <el-container>
+      <!-- 菜单栏 -->
+      <el-aside width="auto">
+        <el-menu default-active="99" class="el-menu-vertical-demo" :collapse="isCollapse" @click="clickMenu(item)"
+          background-color="#464547" text-color="#fff" active-text-color="#ffd04b" :collapse="isCollapse">
+          <h3 v-if="!isCollapse">{$title}</h3>
+          <h3 v-if="isCollapse">{$titlemini}</h3>
+          <a href="admin/index/main" target="iframeMain" style="color:white;" @click="titleUrl('控制台')">
+          <el-menu-item index="99" >
+            <i class="el-icon-house"></i>
+            <span slot="title">首页</span>
+          </el-menu-item>
+          </a>
+          {foreach $menus as $number=>$menu}
+          <el-submenu index="{$number}">
+            <template slot="title">
+              <i class="{$menu['icon']}"></i>
+              <span slot="title">{$menu['title']}</span>
+            </template>
+            {foreach $menu['list'] as $numberlist=>$menulist}
+            <a href="{$menulist['url']}" target="iframeMain" style="color:white;"
+              @click="titleUrl('{$menulist['title']}')">
+              <el-menu-item index="{$number}-{$numberlist}">{$menulist['title']}</el-menu-item>
+            </a>
+            {/foreach}
+          </el-submenu>
+          {/foreach}
+        </el-menu>
+      </el-aside>
+      <el-container>
+
+        <el-header>
+          <!-- 头部 -->
+          <header>
+            <div class="l-content">
+              <el-button plain icon="el-icon-menu" size="mini" @click="menuIscollapse"></el-button>
+              <h3 style="color:#fff">{{title_url}}</h3>
+            </div>
+            <div class="r-content">
+              <el-dropdown trigger="click" szie="mini">
+                <span class="el-dropdown-link">
+                  <img src="__STORAGE__/{$user['logourl']}" class="user">
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  {foreach $logomenus as $test}
+                  <el-dropdown-item><a href="{$test['url']}" {if $test['title']!='退出登录'&&$test['title']!='首页'}target="iframeMain"{/if}>{$test['title']}</a></el-dropdown-item>
+                  {/foreach}
+                </el-dropdown-menu>
+              </el-dropdown>
+            </div>
+          </header>
+        </el-header>
+
+        <el-main style="overflow: hidden;">
+          <!-- <div class="iframeMain">
+          </div> -->
+          <iframe src="admin/index/main" class="iframeMain" name="iframeMain" frameborder="0"></iframe>
+        </el-main>
+      </el-container>
+    </el-container>
+  </div>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        isCollapse: false,
+        title_url: '控制台',
+      },
+      methods: {
+        menuIscollapse: function () {
+          this.isCollapse = !this.isCollapse;
+        },
+        titleUrl: function (title) {
+          this.title_url = title;
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

@@ -1,56 +1,33 @@
-ThinkPHP 6.0
+基于ThinkPHP 6.0+Vue的博客系统
 ===============
 
-> 运行环境要求PHP7.1+，兼容PHP8.0。
+> 后台：ThinkPHP
+>
+> 前端：Vue+Element+axios
+>
+> 数据库：Mysql 5.7
+>
+> PHP版本：7.3.4
 
-[官方应用服务市场](https://market.topthink.com) | [`ThinkAPI`——官方统一API服务](https://docs.topthink.com/think-api)
+## 截图
 
-ThinkPHPV6.0版本由[亿速云](https://www.yisu.com/)独家赞助发布。
+### 1.首页页面
+## ![1](.\public\static\image\1.png)
+### 2.后台管理页面
+## ![1](.\public\static\image\2.png)
 
-## 主要新特性
-
-* 采用`PHP7`强类型（严格模式）
-* 支持更多的`PSR`规范
-* 原生多应用支持
-* 更强大和易用的查询
-* 全新的事件系统
-* 模型事件和数据库事件统一纳入事件系统
-* 模板引擎分离出核心
-* 内部功能中间件化
-* SESSION/Cookie机制改进
-* 对Swoole以及协程支持改进
-* 对IDE更加友好
-* 统一和精简大量用法
 
 ## 安装
 
-~~~
-composer create-project topthink/think tp 6.0.*
-~~~
 
-如果需要更新框架使用
+使用方式：
+
 ~~~
-composer update topthink/framework
+composer update
 ~~~
 
-## 文档
-
-[完全开发手册](https://www.kancloud.cn/manual/thinkphp6_0/content)
-
-## 参与开发
-
-请参阅 [ThinkPHP 核心框架包](https://github.com/top-think/framework)。
-
-## 版权信息
-
-ThinkPHP遵循Apache2开源协议发布，并提供免费使用。
-
-本项目包含的第三方源码和二进制文件之版权信息另行标注。
-
-版权所有Copyright © 2006-2020 by ThinkPHP (http://thinkphp.cn)
-
-All rights reserved。
-
-ThinkPHP® 商标和著作权所有者为上海顶想信息科技有限公司。
-
-更多细节参阅 [LICENSE.txt](LICENSE.txt)
+## 关于作品
+##### 1.这个博客只是用来应付PHP课程设计的作品，不建议在网站上使用，毕竟安全性没有保证。
+##### 2.请勿将本人作品进行出售。
+##### 3.作品有什么问题要修复的可以留言，我尽量解决。
+##### 4.后续可能不会更新新的功能在这个项目，因为这个项目不是前后端分离，代码看起来较乱。

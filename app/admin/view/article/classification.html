@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app" style="margin-right: 10px;margin-left: 10px;">
+        <h1>分类</h1>
+        <el-button type="primary" style="margin-bottom: 20px;" @click="open" plain>添加分类</el-button>
+        <template>
+            <el-table :data="tableData" height="auto" border>
+                <el-table-column prop="class_id" label="id" width="150">
+                </el-table-column>
+                <el-table-column prop="title" label="名称" width="180">
+                </el-table-column>
+                <el-table-column prop="test" label="描述">
+                </el-table-column>
+                <!-- <el-table-column prop="number" label="总数" width="150">
+                </el-table-column> -->
+                <el-table-column fixed="right" label="操作" width="150">
+                    <template slot-scope="scope">
+                        <el-button type="text" v-if="scope.row.title!='未分类'" @click="edit(scope.row)" size="small">编辑</el-button>
+                        <el-button type="text" v-if="scope.row.title!='未分类'" @click="del(scope.row)" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <br>
+        <!-- <el-pagination background layout="prev, pager, next" :total="100">
+        </el-pagination> -->
+        <!-- 添加与修改 -->
+        <el-dialog title="编辑" :visible.sync="dialogVisible" width="30%">
+            <el-form ref="form" :model="form" label-width="80px">
+                <el-form-item label="分类名称">
+                    <el-input v-model="form.class_name" maxlength="6"></el-input>
+                </el-form-item>
+                <el-form-item label="分类描述">
+                    <el-input v-model="form.class_describe" maxlength="30"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submits">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                dialogVisible: false,
+                url: '',
+                form: {
+                    class_id: '',
+                    class_name: '',
+                    class_describe: ''
+                },
+                tableData: [
+                    {foreach $class as $test}
+                    {
+                        class_id: "{$test['class_id']}",
+                        title: "{$test['class_name']}",
+                        test: "{$test['class_describe']}",
+                    },
+                    {/foreach}
+                ]
+            },
+        methods: {
+            edit: function(data) {
+                this.url = '/admin/article/updateclass';
+                this.dialogVisible = true;
+                this.form.class_id = data.class_id;
+                this.form.class_name = data.title;
+                this.form.class_describe = data.test;
+            },
+            del: function(data) {
+                this.form.class_id = data.class_id;
+                this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.url = '/admin/article/delclass';
+                    this.submits();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            open: function() {
+                this.url = '/admin/article/addclass';
+                this.form.class_name = '';
+                this.form.class_describe = '';
+                this.dialogVisible = true;
+            },
+            submits: function() {
+                var thiss = this;
+                console.log(thiss.form);
+                axios.post(thiss.url, thiss.form).then(
+                    function (response) {
+                        if (response.data.code == 0) {
+                            console.log(response.data);
+                            //消息弹窗
+                            thiss.$message({
+                                showClose: true,
+                                message: '成功！',
+                                type: 'success'
+                            });
+                            //延时执行
+                            thiss.timer = setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else if (response.data.code == 1) {
+                            console.log(response.data);
+                            thiss.$message('添加失败');
+                        }else if (response.data.code == 2) {
+                            console.log(response.data);
+                            thiss.$message('该分类目前有文章，无法删除。');
+                        }
+                    })
+            }
+        }
+        })
+    </script>
+</body>
+
+</html>

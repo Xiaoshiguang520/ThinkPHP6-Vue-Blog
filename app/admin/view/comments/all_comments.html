@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+    <style>
+
+        .user {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        a{
+            text-decoration: none;
+            color: black;
+        }
+        a:hover{
+            color: rgb(109, 109, 109);
+            cursor:pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" style="margin-right: 10px;margin-left: 10px;">
+        <h1>所有评论</h1>
+        <template>
+            <el-table :data="tableData" border>
+                <el-table-column prop="id" label="id" width="100">
+                </el-table-column>
+                <el-table-column prop="image" label="头像" width="70">
+                    <template slot-scope="scope">
+                        <div v-html="scope.row.image"></div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="author" label="作者" width="150">
+                </el-table-column>
+                <el-table-column prop="test" label="内容">
+                </el-table-column>
+                <el-table-column prop="title" label="回复文章" width="400">
+                    <template slot-scope="scope">
+                        <a @click="view(scope.row.ahref)">{{scope.row.title}}</a>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="date" label="日期" width="200">
+
+                </el-table-column>
+                <el-table-column prop="state" label="状态" width="100">
+                    <template slot-scope="scope">
+                        <el-tag type='warning' v-if="scope.row.state=='回复'">{{scope.row.state}}</el-tag>
+                        <el-tag v-if="scope.row.state=='评论'">{{scope.row.state}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column fixed="right" label="操作" width="150">
+                    <template slot-scope="scope">
+                        <!-- <el-button type="text" size="small">查看</el-button> -->
+                        <el-button type="text" size="small" v-if="scope.row.state=='评论'" @click="reply(scope.row)">回复</el-button>
+                        <el-button type="text" size="small" @click="del(scope.row.id)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <br>
+        <el-pagination background layout="prev, pager, next" @current-change="currentChange" :page-size="pageNumber"
+            :total="sum" :current-page="thiss" style="margin-top: 10px;"></el-pagination>
+
+
+        <!-- 添加与修改 -->
+        <el-dialog title="回复" :visible.sync="dialogVisible" width="30%">
+            <el-form ref="replys" :model="replys" label-width="80px">
+                <el-form-item label="回复内容">
+                    <el-input type="textarea" v-model="replys.comments_text" maxlength="254"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="close">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                dialogVisible: false,
+                pageNumber: 10,
+                currentChangeIndex: 1,
+                sum: {$count},
+                thiss: {$p},
+                replys:{
+                    article_id:'',
+                    comments_text:'',
+                    comments_ids:''
+                },
+                form: {
+                    id: ''
+                },
+                tableData: [
+                    {foreach $test as $tests}    
+                {
+                        id: "{$tests['comments_id']}",
+                        image: '<img src="__STORAGE__/{$tests['logourl']}" class="user">',
+                        title: "{$tests['title']}",
+                        author: "{$tests['comments_author']}",
+                        test: "{$tests['comments_text']}",
+                        date: "{$tests['comments_time']}",
+                        state:"{if $tests['comments_ids']!=null}回复{elseif $tests['comments_ids']==null/}评论{/if}",
+                        ahref:"{$tests['article_id']}"
+                    },
+                    {/foreach}
+                ]
+            },
+        methods: {
+            view: function(id) {
+                window.open("http://www.xsgblog.xsg/index/index/archives?id=" + id);
+            },
+            del: function(id) {
+                this.form.id = id;
+                this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.submits();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            currentChange: function(current) {
+                this.currentChangeIndex = current;
+                window.location.href = "/admin/comments/allcomments?p=" + this.currentChangeIndex;
+            },
+            reply:function(data){
+                this.replys.comments_ids=data.id;
+                this.replys.comments_text=data.comments_text;
+                this.replys.article_id=data.ahref;
+                this.dialogVisible=true;
+            },
+            subrely:function(){
+                var thiss = this;
+                console.log(thiss.form);
+                axios.post("/admin/comments/addReply", thiss.replys).then(
+                    function (response) {
+                        if (response.data.code == 0) {
+                            console.log(response.data);
+                            //消息弹窗
+                            thiss.$message({
+                                showClose: true,
+                                message: '成功！',
+                                type: 'success'
+                            });
+                            //延时执行
+                            thiss.timer = setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else if (response.data.code == 1) {
+                            console.log(response.data);
+                            thiss.$message('失败');
+                        }
+                    })
+            },
+            close(){
+                console.log(this.replys);
+                this.subrely();
+                this.dialogVisible=false;
+            },
+            submits: function() {
+                var thiss = this;
+                console.log(thiss.form);
+                axios.post("/admin/comments/delComments", thiss.form).then(
+                    function (response) {
+                        if (response.data.code == 0) {
+                            console.log(response.data);
+                            //消息弹窗
+                            thiss.$message({
+                                showClose: true,
+                                message: '成功！',
+                                type: 'success'
+                            });
+                            //延时执行
+                            thiss.timer = setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else if (response.data.code == 1) {
+                            console.log(response.data);
+                            thiss.$message('失败');
+                        }
+                    })
+            }
+        }
+        })
+    </script>
+
+</html>

@@ -1,0 +1,78 @@
+{block name="title"}归档{/block}
+{extend name="index/main"}
+{block name="style"}
+<style>
+    .title_s {
+        text-align: center;
+        font-size: 33px;
+    }
+
+    .time_s {
+        color: rgb(163, 163, 163);
+    }
+
+    .class_s {
+        width: 700px;
+        margin: 0 auto;
+        margin-top: 50px;
+    }
+
+    .year_s {
+        font-size: 30px;
+    }
+    .testa_s{
+        color: black;
+        font-size: 18px;
+        text-decoration: none;
+    }
+    .testa_s:hover{
+        color: rgb(90, 90, 90);
+    }
+</style>
+{/block}
+{block name="body"}
+<div id="app2" style="margin: 20px;">
+    <el-card class="el-cards">
+        <p class="title_s">文章归档</p>
+        <div class="class_s">
+            <el-timeline>
+                <el-timeline-item v-for="(activity, index) in activities" :key="index" :icon="activity.icon"
+                    :type="activity.type" :color="activity.color" :size="activity.size">
+                    <span class="year_s" v-if="activity.year!=null">{{activity.year}}</span>
+                    <span class="time_s"
+                        v-if="activity.timestamp!=null">{{activity.timestamp}}&nbsp;&nbsp;&nbsp;&nbsp;</span><span
+                        v-if="activity.content!=null"><a class="testa_s" :href="activity.article_id">{{activity.content}}</a></span>
+                </el-timeline-item>
+            </el-timeline>
+        </div>
+    </el-card>
+</div>
+{/block}
+
+
+{block name="script"}
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            activities: [
+            {foreach $test as $tests}
+                {
+                    year: '{$tests["year"]}年',
+                    size: 'large',
+                    color: '#5bc0eb'
+                },
+                {foreach $tests['list'] as $list}
+                    {
+                        article_id:'http://www.xsgblog.xsg/index/index/archives?id={$list["article_id"]}',
+                        content: '{$list["title"]}',
+                        timestamp: '{$list["time"]}',
+                        size: 'normal',
+                    },
+                {/foreach}  
+            {/foreach}
+                ]
+        }
+    })
+</script>
+{/block}

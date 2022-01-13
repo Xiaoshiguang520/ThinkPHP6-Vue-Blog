@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 先引入vue，再引入element -->
+    <script src="__STATIC__\vue\vue.js"></script>
+    <link rel="stylesheet" href="__STATIC__\element\css\index.css">
+    <script src="__STATIC__\element\js\index.js"></script>
+    <script src="__STATIC__\axios\axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app" style="margin:20px;">
+        <el-card>
+            <h1>注册页外观</h1>
+            <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="100px"
+                class="demo-ruleForm">
+                <el-form-item label="背景颜色" prop="theme_background">
+                    <el-color-picker v-model="ruleForm.theme_background"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="当前颜色">
+                    <el-input type="text" v-model="ruleForm.theme_background" autocomplete="off" :disabled="true"
+                        style="width: 400px;"></el-input>
+                </el-form-item>
+                <el-form-item label="文字颜色" prop="theme_color">
+                    <el-color-picker v-model="ruleForm.theme_color"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="当前颜色">
+                    <el-input type="text" v-model="ruleForm.theme_color" autocomplete="off" :disabled="true"
+                        style="width: 400px;"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="sub">提交</el-button>
+                </el-form-item>
+            </el-form>
+
+        </el-card>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                ruleForm: {
+                    theme_background: "{$data['theme_background']}",
+                    theme_color:"{$data['theme_color']}"
+
+                }
+
+            },
+            methods: {
+                sub:function(){
+                    var thiss = this;
+                    axios.post('/admin/theme/loginTheme', thiss.ruleForm).then(
+                        function (response) {
+                            if (response.data.code == 0) {
+                                thiss.$message({
+                                    showClose: true,
+                                    message: '修改成功',
+                                    type: 'success'
+                                });
+                                //延时执行
+                                thiss.timer = setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else if (response.data.code == 1) {
+                                console.log(response.data);
+                                thiss.$message(response.data);
+                            }
+                        })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
