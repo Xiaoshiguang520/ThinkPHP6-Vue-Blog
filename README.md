@@ -12,9 +12,9 @@
 ## 截图
 
 ### 1.首页页面
-## ![1](.\public\static\image\1.png)
+![首页](\public\static\image\1.png)
 ### 2.后台管理页面
-## ![1](.\public\static\image\2.png)
+![后台](\public\static\image\2.png)
 
 
 ## 安装
