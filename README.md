@@ -13,7 +13,9 @@
 
 ### 1.首页页面
 ![首页](https://github.com/Xiaoshiguang520/ThinkPHP6-Vue-Blog/blob/master/public/static/image/1.png)
-### 2.后台管理页面
+### 2.文章详细页面
+![首页](https://github.com/Xiaoshiguang520/ThinkPHP6-Vue-Blog/blob/master/public/static/image/3.png)
+### 3.后台管理页面
 ![后台](https://github.com/Xiaoshiguang520/ThinkPHP6-Vue-Blog/blob/master/public/static/image/2.png)
 
 
